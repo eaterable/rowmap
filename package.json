@@ -1,0 +1,27 @@
+{
+  "name": "rowmap",
+  "version": "1.0.0",
+  "description": "A lightweight library to map tabular data to objects effortlessly in JavaScript or TypeScript.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "test": "node --test index.test.mjs"
+  },
+  "keywords": [
+    "tabular-data",
+    "csv",
+    "data-mapping",
+    "object-mapping",
+    "rowmap",
+    "typescript"
+  ],
+  "author": "Yaroslav Serhieiev <noomorph@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "node": ">=18.0.0"
+  }
+}
