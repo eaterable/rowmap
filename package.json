@@ -1,7 +1,10 @@
 {
-  "name": "rowmap",
+  "name": "@eaterable/rowmap",
   "version": "1.0.0",
   "description": "A lightweight library to map tabular data to objects effortlessly in JavaScript or TypeScript.",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.js",
   "types": "index.d.ts",
   "files": [

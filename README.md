@@ -18,7 +18,7 @@ Effortlessly map tabular data (like CSV rows) to objects using lightweight dynam
 Install using npm:
 
 ```bash
-npm install rowmap
+npm install @eaterable/rowmap
 ```
 
 ## ✨ Usage
@@ -28,7 +28,7 @@ The `rowmap` function provides a **universal mapper** that can function as both 
 ### Universal Mapper Example
 
 ```typescript
-import rowmap from 'rowmap';
+import rowmap from '@eaterable/rowmap';
 
 // Example data
 const [headers, ...rows] = [
