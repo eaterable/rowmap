@@ -10,6 +10,8 @@ export interface RowMapperOptions<T extends Record<string, any>> {
   index?: boolean;
   /** Whether to include the length property (default: true) */
   length?: boolean;
+  /** Prevent later duplicate property assignments (default: false) */
+  preventCollisions?: boolean;
 }
 
 /**
@@ -52,10 +54,10 @@ interface RowMapperClass<T extends Record<string, any>> {
  * }
  *
  * // Using array syntax
- * const UserMapper = rowmapper<UserRow>(['id', 'name', 'email']);
+ * const UserMapper = rowmap<UserRow>(['id', 'name', 'email']);
  *
  * // Using options object
- * const UserMapper = rowmapper<UserRow>({
+ * const UserMapper = rowmap<UserRow>({
  *   headers: ['id', 'name', 'email'],
  *   className: 'UserMapper',
  *   index: true
@@ -70,7 +72,7 @@ interface RowMapperClass<T extends Record<string, any>> {
  * @returns A class/function that can create row mapping instances
  * @throws {Error} If no headers are provided
  */
-export default function rowmapper<T extends Record<string, any>>(
+export default function rowmap<T extends Record<string, any>>(
   config: (keyof T)[] | RowMapperOptions<T>
 ): RowMapperClass<T>;
 

@@ -4,16 +4,23 @@ const ROW_INDEX = Symbol('rowIndex');
 
 /**
  * Creates a dynamic row mapper class for mapping tabular data rows to objects.
- * @param {string[] | { headers: string[], index?: boolean, length?: boolean, className?: string }} options - The property names or a configuration object with headers.
+ * @param {string[] | { headers: string[], index?: boolean, length?: boolean, className?: string, preventCollisions?: boolean }} options - The property names or a configuration object with headers.
  * @returns {Function} A dynamically named class for mapping rows or a mapping function.
  */
 function createRowMapper(options) {
   if (!options) {
     throw new Error('Headers must be an array or provided in a configuration object.');
   }
-  const { headers, className = 'RowMapper', index = true, length = true } = Array.isArray(options) ? { headers: options } : options;
-  const hasIndexInHeaders = headers.includes('index');
-  const hasLengthInHeaders = headers.includes('length');
+  const {
+    headers,
+    className = 'RowMapper',
+    preventCollisions = false,
+    index = true,
+    length = true
+  } = Array.isArray(options) ? { headers: options } : options;
+  const uniqueHeaders = preventCollisions ? [...new Set(headers)] : headers;
+  const hasIndexInHeaders = uniqueHeaders.includes('index');
+  const hasLengthInHeaders = uniqueHeaders.includes('length');
 
   // Define the constructor function
   function DynamicMapper(values, rowIndex) {
@@ -28,8 +35,8 @@ function createRowMapper(options) {
   Object.defineProperty(DynamicMapper.prototype, 'toJSON', {
     value: function toJSON() {
       const obj = {};
-      for (let i = 0; i < headers.length; i++) {
-        obj[headers[i]] = this[VALUES][i];
+      for (const key of uniqueHeaders) {
+        obj[key] = this[key];
       }
       return obj;
     },
@@ -53,7 +60,10 @@ function createRowMapper(options) {
   });
 
   // Add header-based getters and setters to the prototype
-  headers.forEach(definePropertyForHeader, DynamicMapper.prototype);
+  headers.forEach(
+    preventCollisions ? defineUniquePropertyForHeader : defineOverwritablePropertyForHeader,
+    DynamicMapper.prototype
+  );
 
   // Add "index" getter if needed
   if (index && !hasIndexInHeaders) {
@@ -84,8 +94,8 @@ function createRowMapper(options) {
 }
 
 // Function to add properties to the prototype for headers
-function definePropertyForHeader(key, colIndex) {
-  Object.defineProperty(this, key, {
+function definePropertyForHeader(target, key, colIndex, configurable) {
+  Object.defineProperty(target, key, {
     get: function getColumnValue() {
       return this[VALUES][colIndex];
     },
@@ -93,7 +103,20 @@ function definePropertyForHeader(key, colIndex) {
       this[VALUES][colIndex] = value;
     },
     enumerable: true,
+    configurable,
   });
+}
+
+// Function to add overwritable properties to the prototype for headers
+function defineOverwritablePropertyForHeader(key, colIndex) {
+  definePropertyForHeader(this, key, colIndex, true);
+}
+
+// Function to add unique properties to the prototype for headers
+function defineUniquePropertyForHeader(key, colIndex) {
+  if (!Reflect.has(this, key)) {
+    definePropertyForHeader(this, key, colIndex, false);
+  }
 }
 
 // Function to add the "index" property to the prototype
@@ -106,6 +129,7 @@ function definePropertyForIndex(prototype) {
       throw new Error('"index" is a read-only property when not part of the headers.');
     },
     enumerable: false,
+    configurable: true,
   });
 }
 

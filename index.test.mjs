@@ -150,7 +150,10 @@ test('RowMap', async (t) => {
   });
 
   await t.test('Supports headers with special names', () => {
-    const Row = createRowMapper(['constructor', 'toString', 'valueOf']);
+    const Row = createRowMapper({
+      headers: ['constructor', 'toString', 'valueOf'],
+      preventCollisions: false,
+    });
     const row = new Row(['ctor', 'str', 'val']);
 
     assert.equal(row.constructor, 'ctor');
@@ -204,5 +207,48 @@ test('RowMap', async (t) => {
     assert.equal(row.name, 'Bob');
     assert.equal(row[2], 'bob@example.com');
     assert.equal(row.email, 'bob@example.com');
+  });
+
+  await t.test('Supports numeric index access for setting values', () => {
+    const Row = createRowMapper(['id', 'name', 'email']);
+    const row = new Row([1, 'Alice', 'alice@example.com']);
+
+    // Test setting values using numeric indices
+    row[0] = 2;
+    row[1] = 'Bob';
+    row[2] = 'bob@example.com';
+
+    // Verify values were updated both through numeric and named access
+    assert.equal(row[0], 2);
+    assert.equal(row.id, 2);
+    assert.equal(row[1], 'Bob');
+    assert.equal(row.name, 'Bob');
+    assert.equal(row[2], 'bob@example.com');
+    assert.equal(row.email, 'bob@example.com');
+  });
+
+  await t.test('Takes header collisions by default', () => {
+    const Row = createRowMapper(['id', 'name', 'id']);
+    const row = new Row([1, 'Alice', 2]);
+
+    assert.equal(row.id, 2);
+    // Array-like behavior should return the original row
+    assert.deepEqual([...row], [1, 'Alice', 2]);
+    // JSON serialization should use the last value
+    assert.deepEqual(row.toJSON(), { id: 2, name: 'Alice' });
+  });
+
+  await t.test('Prevents header collisions when configured', () => {
+    const Row = createRowMapper({
+      headers: ['id', 'name', 'id'],
+      preventCollisions: true,
+    });
+    const row = new Row([1, 'Alice', 2]);
+
+    assert.equal(row.id, 1);
+    // Array-like behavior should return the original row
+    assert.deepEqual([...row], [1, 'Alice', 2]);
+    // JSON serialization should use the last value
+    assert.deepEqual(row.toJSON(), { id: 1, name: 'Alice' });
   });
 });
