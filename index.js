@@ -4,10 +4,10 @@ const ROW_INDEX = Symbol('rowIndex');
 
 /**
  * Creates a dynamic row mapper class for mapping tabular data rows to objects.
- * @param {string[] | { headers: string[], index?: boolean, length?: boolean, className?: string, preventCollisions?: boolean }} options - The property names or a configuration object with headers.
+ * @param {string[] | { headers: string[], index?: boolean, array?: boolean, className?: string, preventCollisions?: boolean }} options - The property names or a configuration object with headers.
  * @returns {Function} A dynamically named class for mapping rows or a mapping function.
  */
-function createRowMapper(options) {
+function rowmap(options) {
   if (!options) {
     throw new Error('Headers must be an array or provided in a configuration object.');
   }
@@ -16,11 +16,11 @@ function createRowMapper(options) {
     className = 'RowMapper',
     preventCollisions = false,
     index = true,
-    length = true
+    array = true
   } = Array.isArray(options) ? { headers: options } : options;
   const uniqueHeaders = preventCollisions ? [...new Set(headers)] : headers;
   const hasIndexInHeaders = uniqueHeaders.includes('index');
-  const hasLengthInHeaders = uniqueHeaders.includes('length');
+  const hasArrayInHeaders = uniqueHeaders.includes('array');
 
   // Define the constructor function
   function DynamicMapper(values, rowIndex) {
@@ -51,7 +51,7 @@ function createRowMapper(options) {
     enumerable: false,
   });
 
-  // Support
+  // Support primitive conversion
   Object.defineProperty(DynamicMapper.prototype, Symbol.toPrimitive, {
     value: function toPrimitive(hint) {
       return String(this[VALUES]);
@@ -70,9 +70,9 @@ function createRowMapper(options) {
     definePropertyForIndex(DynamicMapper.prototype);
   }
 
-  // Add "length" getter if needed
-  if (length && !hasLengthInHeaders) {
-    definePropertyForLength(DynamicMapper.prototype);
+  // Add "array" getter if needed
+  if (array && !hasArrayInHeaders) {
+    definePropertyForArray(DynamicMapper.prototype);
   }
 
   // Add numeric indexing to prototype
@@ -133,17 +133,18 @@ function definePropertyForIndex(prototype) {
   });
 }
 
-// Function to add the "length" property to the prototype
-function definePropertyForLength(prototype) {
-  Object.defineProperty(prototype, 'length', {
-    get: function getLengthValue() {
-      return this[VALUES].length;
+// Function to add the "array" property to the prototype
+function definePropertyForArray(prototype) {
+  Object.defineProperty(prototype, 'array', {
+    get: function getArrayValue() {
+      return this[VALUES];
     },
-    set: function setLengthValue() {
-      throw new Error('"length" is a read-only property when not part of the headers.');
+    set: function setArrayValue() {
+      throw new Error('"array" is a read-only property when not part of the headers.');
     },
     enumerable: false,
+    configurable: true,
   });
 }
 
-module.exports = createRowMapper;
+module.exports = rowmap;

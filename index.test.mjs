@@ -23,8 +23,8 @@ test('RowMap', async (t) => {
     const Row1 = createRowMapper(['id', 'name', 'email']);
     assert.deepEqual(Object.keys(Row1.prototype), ['id', 'name', 'email']);
 
-    const Row2 = createRowMapper(['id', 'name', 'index', 'length']);
-    assert.deepEqual(Object.keys(Row2.prototype), ['id', 'name', 'index', 'length']);
+    const Row2 = createRowMapper(['id', 'name', 'index', 'array']);
+    assert.deepEqual(Object.keys(Row2.prototype), ['id', 'name', 'index', 'array']);
   });
 
   await t.test('Handles index property configuration', () => {
@@ -66,7 +66,7 @@ test('RowMap', async (t) => {
     assert.equal(row.id, undefined);
     assert.equal(row.name, undefined);
     assert.equal(row.email, undefined);
-    assert.equal(row.length, 0);
+    assert.equal(row.array.length, 0);
   });
 
   await t.test('Throws error when no headers provided', () => {
@@ -105,10 +105,10 @@ test('RowMap', async (t) => {
       /\"index\" is a read-only property/
     );
 
-    // Length should be read-only when not in headers
+    // Array should be read-only when not in headers
     assert.throws(
-      () => { row.length = 10; },
-      /\"length\" is a read-only property/
+      () => { row.array = []; },
+      /\"array\" is a read-only property/
     );
   });
 
@@ -142,8 +142,8 @@ test('RowMap', async (t) => {
     // Test spread operator
     assert.deepEqual([...row], values);
 
-    // Test length property
-    assert.equal(row.length, values.length);
+    // Test array property
+    assert.equal(row.array.length, values.length);
 
     // Test Array.from
     assert.deepEqual(Array.from(row), values);
@@ -161,20 +161,20 @@ test('RowMap', async (t) => {
     assert.equal(row.valueOf, 'val');
   });
 
-  await t.test('Handles index and length as headers', () => {
-    const Row = createRowMapper(['id', 'index', 'length']);
-    const values = [1, 2, 3];
+  await t.test('Handles index and array as headers', () => {
+    const Row = createRowMapper(['id', 'index', 'array']);
+    const values = [1, 2, [3, 4]];
     const row = new Row(values, 0);
 
-    // When 'index' is in headers, it should be treated as regular column
+    // When 'index' and 'array' are in headers, they should be treated as regular columns
     assert.equal(row.index, 2);
-    assert.equal(row.length, 3);
+    assert.deepEqual(row.array, [3, 4]);
 
     // Should be mutable
     row.index = 5;
     assert.equal(row.index, 5);
-    row.length = 10;
-    assert.equal(row.length, 10);
+    row.array = [5, 6];
+    assert.deepEqual(row.array, [5, 6]);
   });
 
   await t.test('Supports numeric index access for getting values', () => {

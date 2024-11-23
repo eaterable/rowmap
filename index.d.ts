@@ -8,8 +8,8 @@ export interface RowMapperOptions<T extends Record<string, any>> {
   className?: string;
   /** Whether to include the row index property (default: true) */
   index?: boolean;
-  /** Whether to include the length property (default: true) */
-  length?: boolean;
+  /** Whether to include the array property (default: true) */
+  array?: boolean;
   /** Prevent later duplicate property assignments (default: false) */
   preventCollisions?: boolean;
 }
@@ -22,8 +22,8 @@ export interface RowInstance<T> extends Iterable<any> {
   toJSON(): T;
   /** The zero-based index of this row in the dataset (if enabled) */
   readonly index?: number;
-  /** The number of columns in the row */
-  readonly length: number;
+  /** The underlying array containing the row values */
+  readonly array: any[];
   /** Access values by numeric index */
   [index: number]: any;
 }
@@ -60,7 +60,8 @@ interface RowMapperClass<T extends Record<string, any>> {
  * const UserMapper = rowmap<UserRow>({
  *   headers: ['id', 'name', 'email'],
  *   className: 'UserMapper',
- *   index: true
+ *   index: true,
+ *   array: true,
  * });
  *
  * // Create row instances

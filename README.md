@@ -8,7 +8,7 @@ Effortlessly map tabular data (like CSV rows) to objects using lightweight dynam
 - **Flexible Mapper Behavior**: Use it as a **class** or a **function**—the choice is yours.
 - **Header-Based Mapping**: Map rows to meaningful property names using headers or configuration objects.
 - **Dynamic Properties**: Access and modify array values through descriptive property names.
-- **Array-Like**: Access `length` and iterate like a regular array.
+- **Array Access**: Direct access to the underlying array for advanced operations.
 - **Iterable Support**: Fully compatible with JavaScript's iterable protocol (`for...of`, spread syntax).
 - **Serialization Ready**: Automatically serializable with `JSON.stringify` or a `toJSON()` method.
 - **Minimal API**: Simple, efficient, and developer-friendly.
@@ -57,35 +57,39 @@ console.log(obj);
 ```
 
 ### Configuration Options
-
 ```typescript
 const Row = rowmap({
   headers: ['id', 'name', 'email'],  // Required: column names
   index: false,                      // Optional: disable row index (default: true)
-  className: 'User'                  // Optional: custom class name
+  array: false,                      // Optional: disable array access (default: true)
+  className: 'User',                 // Optional: custom class name
+  preventCollisions: true            // Optional: prevent header collisions (default: false)
 });
 ```
 
 ### Property Access and Modification
-
 ```typescript
 const row = new Row([1, 'Alice', 'alice@example.com']);
 
 // Read values
-console.log(row[0]);  // 'Alice'
-console.log(row.name);  // 'Alice'
-console.log(row.length);  // 3 (number of columns)
+console.log(row[0]);           // 1
+console.log(row.name);         // 'Alice'
+console.log(row.array);        // [1, 'Alice', 'alice@example.com']
+console.log(row.array.length); // 3
 
 // Modify values
 row.name = 'Alicia';
 console.log([...row]);  // [1, 'Alicia', 'alice@example.com']
 
-// Note: 'length' can be used as a header name if needed
-const CustomRow = rowmap(['id', 'name', 'length']);
+// Advanced array operations
+row.array.reverse();
+console.log(row.name);  // Still works with reversed array!
+
+// Note: 'array' can be used as a header name if needed
+const CustomRow = rowmap(['id', 'name', 'array']);
 ```
 
 ### Iteration and Conversion
-
 ```typescript
 // Spread syntax
 const values = [...row];
