@@ -36,17 +36,6 @@ jobs:
       - name: Verify the integrity of provenance attestations and registry signatures
         run: npm audit signatures
 
-      - name: Install semantic-release dependencies
-        run: |
-          npm install --save-dev \
-            semantic-release \
-            @semantic-release/changelog \
-            @semantic-release/commit-analyzer \
-            @semantic-release/release-notes-generator \
-            @semantic-release/npm \
-            @semantic-release/git \
-            @semantic-release/github
-
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
